@@ -39,16 +39,32 @@ void Machine::DrawMachine(SDL_Renderer *r, TTF_Font *f){
     rect->x = x*scale;
     rect->y = y*scale;
     SDL_RenderCopy(r, machineTex, NULL, rect);
+
+
+
     rect->h = 50*scale;
     rect->w = 100*scale;
-    rect->x = x + 65;
+    rect->x = x + 65*scale;
     rect->y = y + 400*scale;
     std::string balanceStr = std::to_string(balance);
-    const char* str = balanceStr.c_str();
-    SDL_Surface *temp = TTF_RenderText_Solid(f, str, {255,255,255,255});
-    SDL_Texture *tex = SDL_CreateTextureFromSurface(r, temp);
-    SDL_FreeSurface(temp);
-    SDL_RenderCopy(r, tex, NULL, rect);
+    char* balanceChar = &balanceStr[0];  
+    SDL_Surface *balanceSurf = TTF_RenderText_Solid(f, balanceChar, {255,255,255,255});
+    SDL_Texture *balanceText = SDL_CreateTextureFromSurface(r, balanceSurf);
+    SDL_RenderCopy(r, balanceText, NULL, rect);
+    SDL_FreeSurface(balanceSurf);
+    SDL_DestroyTexture(balanceText);
+    rect->h = 50*scale;
+    rect->w = 200*scale;
+    rect->x = x + 15*scale;
+    rect->y = y + 10*scale;
+    std::string betStr = "Bet:" + std::to_string(bet);
+    char* betChar = &betStr[0];
+    SDL_Surface *betSurf = TTF_RenderText_Solid(f, betChar, {255,255,255,255});
+    SDL_Texture *betText = SDL_CreateTextureFromSurface(r, betSurf);
+    SDL_RenderCopy(r, betText, NULL, rect);
+    SDL_FreeSurface(betSurf);
+    SDL_DestroyTexture(betText);
+    delete rect;
 }
 void Machine::Spin(bool trytostop){
     if(running){
