@@ -9,4 +9,5 @@ struct Slot{
     int type;
 };
 
+
 #endif

@@ -21,11 +21,13 @@ class Machine{
         void Build(int n, int X, int Y);
         void DrawMachine(SDL_Renderer *r, TTF_Font *f);
         void Spin(bool trytostop);
-        bool DidWin();
+        void ColorSlots(SDL_Color c, std::vector<Slot> v, SDL_Renderer *r);
+        std::vector<Slot> DidWin(double *amount);
         void SetBalance(double b);
         double GetBalance();
         void SetBet(double b);
         double GetBet();
 
 };
+
 #endif

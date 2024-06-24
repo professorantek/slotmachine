@@ -6,6 +6,7 @@
 
 
 #define TICKS_PER_FRAME (300/60)
+#define TICKS_PER_FLASH (50*TICKS_PER_FRAME)
 
 const int W = 230, H = 520;
 SDL_Window *window = nullptr;
@@ -17,18 +18,21 @@ Uint32 rendererFlags  = SDL_RENDERER_ACCELERATED;
 
 TTF_Font *font = nullptr;
 
-int lastTime = 0;
+double lastWin;
+int lastTime = 0, lastFlash = 0;
 int timerStart = 0;
 int spinTime;
+
 bool stop = false;
 bool ready = true;
 bool played = true;
+bool flashWinners = false;
 
 std::ifstream input;
 std::ofstream output;
 
 Machine m;
-std::vector<Column*> columns;
+std::vector<Slot> winners;
 
 
 void CreateWindowAndRenderer(){
@@ -44,6 +48,7 @@ void Init(){
     TTF_Init();
     font = TTF_OpenFont("C:/WINDOWS/FONTS/BAUHS93.TTF", 50);
     CreateWindowAndRenderer();
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 }
 void Quit(){
     SDL_DestroyWindow(window);
@@ -100,6 +105,22 @@ void RenderFrame(){
         m.Spin(stop);
     }
     m.DrawMachine(renderer, font);
+    if(!winners.empty()&&ready){
+        if(flashWinners){
+            SDL_Color color{100,255,200,130};
+            m.ColorSlots(color ,winners, renderer);
+        }
+        std::string winStr = std::to_string(lastWin);
+        winStr = winStr.substr(0, winStr.size()-4);
+        char* winChar = &winStr[0];
+        SDL_Surface *surf  = TTF_RenderText_Solid(font, winChar, {255,255,255,255});
+        SDL_Texture *text = SDL_CreateTextureFromSurface(renderer, surf);
+        SDL_Rect rect{0, H/2-50, W, 50};
+        SDL_RenderCopy(renderer, text, NULL, &rect);
+        SDL_FreeSurface(surf);
+        SDL_DestroyTexture(text);
+    }
+    
     SDL_RenderPresent(renderer);
     
 }
@@ -122,16 +143,21 @@ void Run(){
         while(SDL_GetTicks64()-lastTime<TICKS_PER_FRAME){
             SDL_Delay(1);
         }
+        
         if(lastTime-timerStart >=spinTime){
             stop = true;
         }
+        if(lastTime-lastFlash >=TICKS_PER_FLASH/2){
+            flashWinners = !flashWinners;
+            lastFlash = lastTime;
+        }
         RenderFrame();
         if(!m.IsRunning()&&stop&&!played){
-            m.DidWin();
+            winners = m.DidWin(&lastWin);
             played = true; 
             ready = true;
         }
-        
+       
         lastTime = SDL_GetTicks64();
         
     }

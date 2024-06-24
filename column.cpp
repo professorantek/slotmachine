@@ -10,7 +10,15 @@ Column* SetColumn(int n, int x, int y){
         Slot *s = new Slot;
         s->x = x;
         s->y = y-(SLOTH*n/2)+SLOTH*i;
-        s->type = rand()%TYPE_COUNT;
+        int type = TYPE_COUNT-1;
+        int chance = pow(2, TYPE_COUNT/2+1);
+        while(rand()%chance!=0&&chance!=1&&type>0){
+            type--;
+            if(type%2){
+                chance/=2;   
+            }   
+        }
+        s->type = type;
         slots.push_back(s);
     }
     c->Set(n, x, y , slots);
@@ -56,14 +64,21 @@ bool Column::NextSpin(bool trytostop){
     
     return CANSTOP;
 }
-Slot* Column::CenterSlot(){
+bool compareByY(const Slot &a, const Slot &b){
+    return a.y>b.y;
+}
+std::vector<Slot> Column::WinningSlots(){
+    std::vector<Slot> wS;
     for(Slot *s : slots){
-        if(s->y == cY){
-            running = false;
-            return s;
+        if(abs(s->y-cY)<=(SLOTH)){
+            wS.push_back(*s);
         }
     }
-    return nullptr;
+    if(wS.size()==3){
+        running = false;
+        std::sort(wS.begin(), wS.end(), compareByY);
+    }  
+    return wS;
 }
 
 bool Column::IsRunning(){

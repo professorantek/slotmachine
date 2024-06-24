@@ -13,11 +13,12 @@ class Column{
         
         void Set(int n, int x, int y, std::vector<Slot*> s);
         std::vector<Slot*> SetVisible();
-        Slot* CenterSlot();
+        std::vector<Slot> WinningSlots();
         bool NextSpin(bool trytostop);
         bool IsRunning();    
 
 };
 Column* SetColumn(int n, int x, int y);
+bool compareByY(const Slot &a, const Slot &b);
 
 #endif
